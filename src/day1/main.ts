@@ -1,5 +1,3 @@
-import {readFileSync} from "fs";
-import {createLogger} from "bunyan";
 import * as intersection from "lodash.intersection";
 
 function runChanges(changes: number[], frequency: number): number[] {
@@ -12,29 +10,36 @@ function runChanges(changes: number[], frequency: number): number[] {
 }
 
 
-const inputs = readFileSync('./src/day1/input.txt', { encoding: 'ascii' });
-const log = createLogger({ name: 'AoC2018-1', level: 'debug' });
+export const parse = (rawInputs, _log) => {
+    return rawInputs.split("\n")
+        .filter(value => value !== "")
+        .map((change): number => parseInt(change, 10));
 
+};
 
-let frequency = 0;
-const changes: number[] = inputs.split("\n")
-    .filter(value => value !== "")
-    .map((change): number => parseInt(change, 10));
-let frequencies: number[] = [];
-let found = false;
-let duplicate = 0;
+export const run1 = (changes, _log) => {
+    let frequency = 0;
+    const frequencies = runChanges(changes, frequency);
+    return frequencies.pop();
+};
 
-while (!found) {
-    const newFrequencies = runChanges(changes, frequency);
-    const duplicates = intersection(newFrequencies, frequencies);
-    if (duplicates.length > 0) {
-        log.debug({ frequencies, duplicates });
-        duplicate = duplicates[0];
-        found = true;
-    } else {
-        frequencies = frequencies.concat(newFrequencies);
-        frequency = newFrequencies.pop();
+export const run2 = (changes, log) => {
+    let frequency = 0;
+    let frequencies: number[] = [];
+    let found = false;
+    let duplicate = 0;
+
+    while (!found) {
+        const newFrequencies = runChanges(changes, frequency);
+        const duplicates = intersection(newFrequencies, frequencies);
+        if (duplicates.length > 0) {
+            log.debug({ frequencies, duplicates });
+            duplicate = duplicates[0];
+            found = true;
+        } else {
+            frequencies = frequencies.concat(newFrequencies);
+            frequency = newFrequencies.pop();
+        }
     }
-}
-
-log.debug({ duplicate }, 'Answer');
+    return duplicate;
+};
