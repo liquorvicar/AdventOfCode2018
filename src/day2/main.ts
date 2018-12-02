@@ -53,3 +53,42 @@ export const run1 = (strings, _log) => {
     const counts = countRepeatedLetters(strings);
     return counts[2] * counts[3];
 };
+
+export const differByOne = (first, second) => {
+    let diffs = 0;
+    for (let pos = 0; pos < first.length; pos++) {
+        if (second[pos] !== first[pos]) {
+            diffs++;
+        }
+    }
+    return diffs === 1;
+};
+
+export const findStringsDifferingByOne = (strings) => {
+    const differingStrings = [];
+    while (strings.length > 1 && differingStrings.length === 0) {
+        const string = strings.shift();
+        strings.forEach(stringToCompare => {
+            if (differByOne(string, stringToCompare)) {
+                differingStrings.push(string);
+                differingStrings.push(stringToCompare);
+            }
+        });
+    }
+    return differingStrings;
+};
+
+export const findMatchingChars = (first, second) => {
+    let matchingChars = '';
+    for (let pos = 0; pos < first.length; pos++) {
+        if (second[pos] === first[pos]) {
+            matchingChars = matchingChars + first[pos];
+        }
+    }
+    return matchingChars;
+};
+
+export const run2 = (strings, _log) => {
+    const differingStrings = findStringsDifferingByOne(strings);
+    return findMatchingChars(differingStrings[0], differingStrings[1]);
+};
