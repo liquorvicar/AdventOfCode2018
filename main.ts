@@ -8,7 +8,9 @@ const inputPath = `./src/day${day}/input.txt`;
 const func = `run${part}`;
 const code = require(`./src/day${day}/main`);
 
-const rawInputs = readFileSync(inputPath, { encoding: 'ascii' });
+const rawInputs = readFileSync(inputPath, { encoding: 'ascii' })
+    .split("\n")
+    .filter(value => value !== "");
 const log = createLogger({ name: `AoC2018-${day}-${part}`, level: 'debug' });
 
 const inputs = code.parse(rawInputs, log);

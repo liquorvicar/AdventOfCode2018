@@ -45,8 +45,7 @@ export const countRepeatedLetters = (strings) => {
 };
 
 export const parse = (rawInputs, _log) => {
-    return rawInputs.split("\n")
-        .filter(value => value !== "");
+    return rawInputs;
 };
 
 export const run1 = (strings, _log) => {
