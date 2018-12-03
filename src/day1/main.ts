@@ -12,7 +12,6 @@ function runChanges(changes: number[], frequency: number): number[] {
 
 export const parse = (rawInputs, _log) => {
     return rawInputs.map((change): number => parseInt(change, 10));
-
 };
 
 export const run1 = (changes, _log) => {
