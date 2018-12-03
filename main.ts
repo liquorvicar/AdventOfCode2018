@@ -1,5 +1,5 @@
-import {readFileSync} from "fs";
-import {createLogger} from "bunyan";
+import { readFileSync } from 'fs';
+import { createLogger } from 'bunyan';
 
 const args = process.argv;
 const day = args[2];
@@ -9,8 +9,8 @@ const func = `run${part}`;
 const code = require(`./src/day${day}/main`);
 
 const rawInputs = readFileSync(inputPath, { encoding: 'ascii' })
-    .split("\n")
-    .filter(value => value !== "");
+    .split('\n')
+    .filter(value => value !== '');
 const log = createLogger({ name: `AoC2018-${day}-${part}`, level: 'debug' });
 
 const inputs = code.parse(rawInputs, log);

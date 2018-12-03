@@ -1,4 +1,4 @@
-import * as intersection from "lodash.intersection";
+import * as intersection from 'lodash.intersection';
 
 function runChanges(changes: number[], frequency: number): number[] {
     const frequencies: number[] = [];
@@ -15,7 +15,7 @@ export const parse = (rawInputs, _log) => {
 };
 
 export const run1 = (changes, _log) => {
-    let frequency = 0;
+    const frequency = 0;
     const frequencies = runChanges(changes, frequency);
     return frequencies.pop();
 };

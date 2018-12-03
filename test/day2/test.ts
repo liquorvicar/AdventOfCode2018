@@ -5,7 +5,7 @@ import {
     findStringsDifferingByOne,
     hasLetterThreeTimes,
     hasLetterTwice
-} from "../../src/day2/main";
+} from '../../src/day2/main';
 
 test('has no letter repeated twice',  t => {
     t.false(hasLetterTwice('abcdef'));

@@ -1,5 +1,5 @@
 import test from 'ava';
-import {Claim, countSquaresCovered, findNonOverlappingClaim, markSquaresCovered, parseLine} from "../../src/day3/main";
+import { Claim, countSquaresCovered, findNonOverlappingClaim, markSquaresCovered, parseLine } from '../../src/day3/main';
 
 test('Parses input correctly', t => {
     const input = '#1 @ 1,3: 4x4';

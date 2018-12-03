@@ -1,6 +1,8 @@
-function getLetterCounts(string) {
-    const letters: { [K: string]: number } = {};
-    for (const letter of string) {
+type LetterMap = { [K: string]: number };
+
+function getLetterCounts(inputString: string): LetterMap {
+    const letters: LetterMap = {};
+    for (const letter of inputString) {
         if (letters[letter] !== undefined) {
             letters[letter] += 1;
         } else {
@@ -10,7 +12,7 @@ function getLetterCounts(string) {
     return letters;
 }
 
-const hasLetterXTimes = (letters, times) => {
+const hasLetterXTimes = (letters: LetterMap, times: number): boolean => {
     for (const letter in letters) {
         if (letters[letter] === times) {
             return true;
@@ -19,12 +21,12 @@ const hasLetterXTimes = (letters, times) => {
     return false;
 };
 
-export const hasLetterTwice = (string) => {
-    return hasLetterXTimes(getLetterCounts(string), 2);
+export const hasLetterTwice = (inputString) => {
+    return hasLetterXTimes(getLetterCounts(inputString), 2);
 };
 
-export const hasLetterThreeTimes = (string) => {
-    return hasLetterXTimes(getLetterCounts(string), 3);
+export const hasLetterThreeTimes = (inputString) => {
+    return hasLetterXTimes(getLetterCounts(inputString), 3);
 };
 
 export const countRepeatedLetters = (strings) => {
@@ -32,8 +34,8 @@ export const countRepeatedLetters = (strings) => {
         2: 0,
         3: 0
     };
-    strings.forEach(string => {
-        const letterCounts = getLetterCounts(string);
+    strings.forEach(inputString => {
+        const letterCounts = getLetterCounts(inputString);
         if (hasLetterXTimes(letterCounts, 2)) {
             counts[2]++;
         }
@@ -66,10 +68,10 @@ export const differByOne = (first, second) => {
 export const findStringsDifferingByOne = (strings) => {
     const differingStrings = [];
     while (strings.length > 1 && differingStrings.length === 0) {
-        const string = strings.shift();
+        const inputString = strings.shift();
         strings.forEach(stringToCompare => {
-            if (differByOne(string, stringToCompare)) {
-                differingStrings.push(string);
+            if (differByOne(inputString, stringToCompare)) {
+                differingStrings.push(inputString);
                 differingStrings.push(stringToCompare);
             }
         });
