@@ -1,5 +1,5 @@
 import test from 'ava';
-import {Claim, countSquaresCovered, markSquaresCovered, parseLine} from "../../src/day3/main";
+import {Claim, countSquaresCovered, findNonOverlappingClaim, markSquaresCovered, parseLine} from "../../src/day3/main";
 
 test('Parses input correctly', t => {
     const input = '#1 @ 1,3: 4x4';
@@ -82,4 +82,16 @@ test('Sample data', t => {
         return markSquaresCovered(parseLine(claim), grid);
     }, {});
     t.is(countSquaresCovered(grid), 4);
+});
+
+test('Find claim that doesn\'t overlap', t => {
+    const claims = [
+        '#1 @ 1,3: 4x4',
+        '#2 @ 3,1: 4x4',
+        '#3 @ 5,5: 2x2'
+    ].map(parseLine);
+    const grid = claims.reduce((grid, claim) => {
+        return markSquaresCovered(claim, grid);
+    }, {});
+    t.is(findNonOverlappingClaim(grid, claims), 3);
 });

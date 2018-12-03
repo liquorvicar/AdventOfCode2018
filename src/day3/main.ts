@@ -30,7 +30,13 @@ export const run1 = (claims: Claim[], _log) => {
     return countSquaresCovered(grid);
 };
 
-export const markSquaresCovered = (claim: Claim, grid: { [K: number]: { [K: number]: number }}) => {
+type Grid = {
+    [K: number]: {
+        [K: number]: number
+    }
+};
+
+export const markSquaresCovered = (claim: Claim, grid: Grid) => {
     for (let y = claim.topOffset; y < (claim.topOffset + claim.height); y++) {
         if (grid[y] === undefined) {
             grid[y] = {};
@@ -45,7 +51,7 @@ export const markSquaresCovered = (claim: Claim, grid: { [K: number]: { [K: numb
     return grid;
 };
 
-export const countSquaresCovered = (grid: { [K: number]: { [K: number]: number }}): number => {
+export const countSquaresCovered = (grid: Grid): number => {
     let count = 0;
     for (const row in grid) {
         for (const square in grid[row]) {
@@ -55,4 +61,31 @@ export const countSquaresCovered = (grid: { [K: number]: { [K: number]: number }
         }
     }
     return count;
+};
+
+export const findNonOverlappingClaim = (grid: Grid, claims: Claim[]): number => {
+    const claim = claims.find(claim => {
+        for (let y = claim.topOffset; y < (claim.topOffset + claim.height); y++) {
+            if (grid[y] === undefined) {
+                return false;
+            }
+            for (let x = claim.leftOffset; x < (claim.leftOffset + claim.width); x++) {
+                if (grid[y][x] === undefined) {
+                    return false
+                }
+                if (grid[y][x] !== 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    });
+    return claim ? claim.id : 0;
+};
+
+export const run2 = (claims: Claim[], _log) => {
+    const grid = claims.reduce((grid, claim) => {
+        return markSquaresCovered(claim, grid);
+    }, {});
+    return findNonOverlappingClaim(grid, claims);
 };
