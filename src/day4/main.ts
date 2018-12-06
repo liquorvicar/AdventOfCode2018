@@ -3,7 +3,7 @@ import * as Logger from 'bunyan';
 
 export type EventType = 'start-shift' | 'falls-asleep' | 'wakes-up';
 
-type LogEvent = {
+export type LogEvent = {
     day: string;
     time: number;
     guard?: number;
@@ -55,10 +55,14 @@ type DiaryEntry = {
 };
 type Diary = DiaryEntry[];
 
-export const processEvents = (events: LogEvent[]): Diary => {
-    const sortedEvents = events.sort((a, b) => {
+export const sortEvents = (events: LogEvent[]): LogEvent[] => {
+    return events.sort((a, b) => {
         return (a.day < b.day || (a.day === b.day && a.time < b.time)) ? -1 : 1;
     });
+};
+
+export const processEvents = (events: LogEvent[]): Diary => {
+    const sortedEvents = sortEvents(events);
     let currentEntry: DiaryEntry;
     const diary: Diary = [];
     let asleepSince = -1;
@@ -91,21 +95,33 @@ export const processEvents = (events: LogEvent[]): Diary => {
     return diary;
 };
 
-export const findGuardWithMostMinutes = (diary: Diary): number => {
-    let id = 0;
-    let maxMins = 0;
+export const findGuardWithMostMinutes = (diary: Diary, log: Logger): number => {
+    const guards: { [K: number]: number } = {};
     diary.forEach(entry => {
         let minsForEntry = 0;
         for (const minute in entry.minutes) {
-            if (minute) {
+            if (entry.minutes[minute]) {
                 minsForEntry++;
             }
         }
-        if (minsForEntry > maxMins) {
-            id = entry.guard;
-            maxMins = minsForEntry;
+        if (guards[entry.guard] === undefined) {
+            guards[entry.guard] = 0;
         }
+        guards[entry.guard] += minsForEntry;
     });
+    log.info({ guards }, 'How sleepy are these peeps');
+    let id = 0;
+    let maxMins = 0;
+    for (const guard of Object.keys(guards)) {
+        if (!guards.hasOwnProperty(guard)) {
+            continue;
+        }
+        if (guards[guard] > maxMins) {
+            id = parseInt(guard, 10);
+            maxMins = guards[guard];
+            log.info({ id, maxMins }, 'New sleepiest guard');
+        }
+    }
     return id;
 };
 
@@ -135,7 +151,7 @@ export const findFavouriteMinute = (diary: Diary, guard: number): number => {
 
 export const run1 = (events: LogEvent[], log: Logger) => {
     const diary = processEvents(events);
-    const guard = findGuardWithMostMinutes(diary);
+    const guard = findGuardWithMostMinutes(diary, log);
     log.info({ guard }, 'Sleepiest guard found');
     const favouriteMinute = findFavouriteMinute(diary, guard);
     log.info({ favouriteMinute }, 'Fave!');
