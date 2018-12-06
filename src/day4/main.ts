@@ -76,7 +76,7 @@ export const processEvents = (events: LogEvent[]): Diary => {
                 guard: event.guard,
                 minutes: {}
             };
-            for (let minute = 0; minute < 60; minute++ ) {
+            for (let minute = 0; minute < 60; minute++) {
                 currentEntry.minutes[minute] = false;
             }
             asleepSince = -1;
@@ -125,7 +125,7 @@ export const findGuardWithMostMinutes = (diary: Diary, log: Logger): number => {
     return id;
 };
 
-export const findFavouriteMinute = (diary: Diary, guard: number): number => {
+export const findFavouriteMinute = (diary: Diary, guard: number): { favourite: number, timesSlept: number } => {
     const entriesForGuard = diary.filter(entry => entry.guard === guard);
     const minutes: { [K: number]: number } = {};
     for (let minute = 0; minute < 60; minute++) {
@@ -146,7 +146,7 @@ export const findFavouriteMinute = (diary: Diary, guard: number): number => {
             favourite = minute;
         }
     }
-    return favourite;
+    return { favourite, timesSlept: maxMins };
 };
 
 export const run1 = (events: LogEvent[], log: Logger) => {
@@ -155,5 +155,31 @@ export const run1 = (events: LogEvent[], log: Logger) => {
     log.info({ guard }, 'Sleepiest guard found');
     const favouriteMinute = findFavouriteMinute(diary, guard);
     log.info({ favouriteMinute }, 'Fave!');
-    return guard * favouriteMinute;
+    return guard * favouriteMinute.favourite;
+};
+
+export const findGuardMostAsleepOnSingleMinute = (diary: Diary): { guard: number, minute: number } => {
+    const allGuards = diary.map(entry => entry.guard).reduce((guards, guard) => {
+        if (guards.indexOf(guard) < 0) {
+            guards.push(guard);
+        }
+        return guards;
+    }, []);
+    let mostAsleep = { guard: 0, minute: 0 };
+    let times = 0;
+    allGuards.forEach(guard => {
+        const favourite = findFavouriteMinute(diary, guard);
+        if (favourite.timesSlept > times) {
+            mostAsleep = { guard, minute: favourite.favourite };
+            times = favourite.timesSlept;
+        }
+    });
+    return mostAsleep;
+};
+
+export const run2 = (events: LogEvent[], log: Logger) => {
+    const diary = processEvents(events);
+    const mostAsleep = findGuardMostAsleepOnSingleMinute(diary);
+    log.info({ mostAsleep }, 'Sleepiest guard found');
+    return mostAsleep.minute * mostAsleep.guard;
 };

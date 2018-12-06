@@ -1,7 +1,7 @@
 import test from 'ava';
 import {
     EventType,
-    findFavouriteMinute,
+    findFavouriteMinute, findGuardMostAsleepOnSingleMinute,
     findGuardWithMostMinutes,
     LogEvent,
     parseLine,
@@ -139,7 +139,7 @@ test('Find most common minute for guard', t => {
     ].map(parseLine);
     const diary = processEvents(events);
     const favouriteMinute = findFavouriteMinute(diary, 10);
-    t.is(favouriteMinute, 24);
+    t.is(favouriteMinute.favourite, 24);
 });
 
 test('Sort events', t => {
@@ -181,4 +181,30 @@ test('Sort events', t => {
     t.is(3, sortedEvents[2].guard);
     t.is(4, sortedEvents[3].guard);
     t.is(5, sortedEvents[4].guard);
+});
+
+test('Find guard with most asleep on single minute', t => {
+    const events = [
+        '[1518-11-01 00:00] Guard #10 begins shift',
+        '[1518-11-01 00:05] falls asleep',
+        '[1518-11-01 00:25] wakes up',
+        '[1518-11-02 00:40] falls asleep',
+        '[1518-11-01 00:30] falls asleep',
+        '[1518-11-01 00:55] wakes up',
+        '[1518-11-03 00:05] Guard #10 begins shift',
+        '[1518-11-02 00:50] wakes up',
+        '[1518-11-03 00:24] falls asleep',
+        '[1518-11-04 00:36] falls asleep',
+        '[1518-11-03 00:29] wakes up',
+        '[1518-11-01 23:58] Guard #99 begins shift',
+        '[1518-11-04 00:02] Guard #99 begins shift',
+        '[1518-11-04 00:46] wakes up',
+        '[1518-11-05 00:45] falls asleep',
+        '[1518-11-05 00:03] Guard #99 begins shift',
+        '[1518-11-05 00:55] wakes up'
+    ].map(parseLine);
+    const diary = processEvents(events);
+    const mostAsleep = findGuardMostAsleepOnSingleMinute(diary);
+    t.is(mostAsleep.guard, 99);
+    t.is(mostAsleep.minute, 45);
 });
