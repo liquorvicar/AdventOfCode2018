@@ -1,5 +1,5 @@
 import { test } from 'ava';
-import {processReaction, reacts} from '../../src/day5/main';
+import {findAllTypes, findShortestPossiblePolymer, processReaction, reacts} from '../../src/day5/main';
 
 test('Two different types do not react', t => {
     t.is(reacts('a', 'b'), false);
@@ -25,4 +25,14 @@ fullTests.forEach(testData => {
     test(testData[0], t => {
         t.is(processReaction(testData[0]), testData[1]);
     });
+});
+
+test('Find all types in polymer', t => {
+    const polymer = 'dabAcCaCBAcCcaDA';
+    t.deepEqual(findAllTypes(polymer), ['a', 'b', 'c', 'd']);
+});
+
+test('Find shortest possible polymer', t => {
+    const polymer = 'dabAcCaCBAcCcaDA';
+    t.deepEqual(findShortestPossiblePolymer(polymer), 4);
 });

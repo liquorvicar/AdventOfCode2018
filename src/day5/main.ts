@@ -33,3 +33,30 @@ export const run1 = (input: string[], _log: Logger): number => {
     const newPolymer = processReaction(input[0]);
     return newPolymer.length;
 };
+
+export const findAllTypes = (polymer: string): string[] => {
+    return polymer.split('').reduce((types, type) => {
+        if (types.indexOf(type.toLowerCase()) < 0) {
+            types.push(type.toLowerCase());
+        }
+        return types;
+    }, []).sort();
+};
+
+export const findShortestPossiblePolymer = (polymer: string): number => {
+    const types = findAllTypes(polymer);
+    let shortestPolymer = polymer.length;
+    types.forEach(type => {
+        const removeType = polymer.replace(new RegExp(type, 'g'), '')
+            .replace(new RegExp(type.toUpperCase(), 'g'), '');
+        const reducedPolymer = processReaction(removeType);
+        if (reducedPolymer.length < shortestPolymer) {
+            shortestPolymer = reducedPolymer.length;
+        }
+    });
+    return shortestPolymer;
+};
+
+export const run2 = (input: string[], _log: Logger): number => {
+    return findShortestPossiblePolymer(input[0]);
+};
