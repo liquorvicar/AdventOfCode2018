@@ -1,5 +1,6 @@
 import { test } from 'ava';
 import {
+    calculateLocationSafeScore, countSafeLocations,
     detectClosestCoordinate,
     findInfiniteAreas,
     findLimits,
@@ -125,4 +126,28 @@ test('Parse input', t => {
         { id: 'F', column: 8, row: 9 }
     ];
     t.deepEqual(parse(input, null), coordinates);
+});
+
+test('Calculate location safe score', t => {
+    const coordinates = [
+        { id: 'A', column: 1, row: 1 },
+        { id: 'B', column: 1, row: 6 },
+        { id: 'C', column: 8, row: 3 },
+        { id: 'D', column: 3, row: 4 },
+        { id: 'E', column: 5, row: 5 },
+        { id: 'F', column: 8, row: 9 }
+    ];
+    t.is(calculateLocationSafeScore(4, 3, coordinates), 30);
+});
+
+test('Count safe locations', t => {
+    const coordinates = [
+        { id: 'A', column: 1, row: 1 },
+        { id: 'B', column: 1, row: 6 },
+        { id: 'C', column: 8, row: 3 },
+        { id: 'D', column: 3, row: 4 },
+        { id: 'E', column: 5, row: 5 },
+        { id: 'F', column: 8, row: 9 }
+    ];
+    t.is(countSafeLocations(coordinates, 32), 16);
 });

@@ -102,3 +102,26 @@ export const parse = (rawInputs: string[], _log: Logger): Coordinates => {
 export const run1 = (coordinates: Coordinates, _log: Logger): number => {
     return findSizeOfLargestFiniteArea(coordinates);
 };
+
+export const calculateLocationSafeScore = (column: number, row: number, coordinates: Coordinates): number => {
+    return coordinates.reduce((score, coordinate) => {
+        return score + Math.abs(coordinate.column - column) + Math.abs(coordinate.row - row);
+    }, 0);
+};
+
+export const countSafeLocations = (coordinates: Coordinates, safeScore: number): number => {
+    const limits = findLimits(coordinates);
+    let count = 0;
+    for (let row = 0; row <= limits[1]; row++) {
+        for (let column = 0; column <= limits[0]; column++) {
+            if (calculateLocationSafeScore(column, row, coordinates) < safeScore) {
+                count++;
+            }
+        }
+    }
+    return count;
+};
+
+export const run2 = (coordinates: Coordinates, _log: Logger): number => {
+    return countSafeLocations(coordinates, 10000);
+};
