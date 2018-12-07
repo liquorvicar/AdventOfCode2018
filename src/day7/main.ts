@@ -26,10 +26,13 @@ export const detectNextStep = (tree: StepTree): string => {
             continue;
         }
         if (tree[step].length === 0) {
-            return step;
+            possibleSteps.push(step);
         }
     }
-    return '';
+    if (possibleSteps.length === 0) {
+        return '';
+    }
+    return possibleSteps.sort()[0];
 };
 
 export const calculateStepOrder = (tree: StepTree): string => {
