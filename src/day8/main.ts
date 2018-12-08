@@ -41,3 +41,22 @@ export const parse = (rawInput: string[], _log: Logger): number[] => {
 export const run1 = (numbers: number[], _log: Logger): number => {
     return sumMetadata(parseNumbers(numbers), 0);
 };
+
+export const calculateValue = (node: Node, value: number): number => {
+    if (node.children.length === 0) {
+        return node.metadata.reduce((value, metadatum) => {
+            return value + metadatum;
+        }, value);
+    }
+    return node.metadata.reduce((value, childId) => {
+        if (node.children[childId - 1]) {
+            return calculateValue(node.children[childId - 1], value);
+        } else {
+            return value;
+        }
+    }, value);
+};
+
+export const run2 = (numbers: number[], _log: Logger): number => {
+    return calculateValue(parseNumbers(numbers), 0);
+};
