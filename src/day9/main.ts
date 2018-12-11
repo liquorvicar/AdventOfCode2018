@@ -1,4 +1,4 @@
-import Logger = require('bunyan');
+import * as Logger from 'bunyan';
 
 type GameBoard = {
     marbles: number[];
@@ -54,7 +54,7 @@ export const runGame = (numPlayers: number, lastMarble: number, log: Logger): nu
         nextMarble: 1
     };
     while (gameBoard.nextMarble <= lastMarble) {
-        if (gameBoard.nextMarble % 10000 ===0) {
+        if (gameBoard.nextMarble % 10000 === 0) {
             log.info({ marble: gameBoard.nextMarble, total: lastMarble }, 'Running...');
         }
         gameBoard = playTurn(gameBoard, numPlayers, log);

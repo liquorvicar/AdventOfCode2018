@@ -1,5 +1,5 @@
 import { test } from 'ava';
-import {findAllTypes, findShortestPossiblePolymer, processReaction, reacts} from '../../src/day5/main';
+import { findAllTypes, findShortestPossiblePolymer, processReaction, reacts } from '../../src/day5/main';
 
 test('Two different types do not react', t => {
     t.is(reacts('a', 'b'), false);

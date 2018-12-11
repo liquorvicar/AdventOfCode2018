@@ -1,4 +1,4 @@
-import Logger = require('bunyan');
+import * as Logger from 'bunyan';
 
 type Coordinates = { id: string, column: number, row: number }[];
 
