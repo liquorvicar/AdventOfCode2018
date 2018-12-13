@@ -16,5 +16,11 @@ powerLevels.forEach((testData, testNum) => {
 
 
 test('Calculate optimal power area', t => {
-    t.deepEqual(calculateOptimalPowerLevels(300, 300, 42), { x: 21, y: 61 });
+    t.deepEqual(calculateOptimalPowerLevels(42, 3, 3).topLeft, { x: 21, y: 61 });
+});
+
+test('Calculate optimal power area for non-fixed grid', t => {
+    const optimalPowerLevels = calculateOptimalPowerLevels(18, 1, 20);
+    t.deepEqual(optimalPowerLevels.topLeft, { x: 90, y: 269 });
+    t.is(optimalPowerLevels.size, 16);
 });
