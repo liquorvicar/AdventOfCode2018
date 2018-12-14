@@ -1,12 +1,11 @@
 import { test } from 'ava';
 import { runModel, sumPotsWithPlants } from '../../src/day12/main';
+import * as Logger from 'bunyan';
 
+const logger = Logger.createLogger({ name: 'day-12-tests' });
 const allTestData = [
-    { generation: 1, result: { state: '..#...#....#.....#..#..#..#...........', start: -2 } },
-    { generation: 2, result: { state: '..##..##...##....#..#..#..##..........', start: -2 } },
-    { generation: 3, result: { state: '..#.#...#..#.#....#..#..#...#..........', start: -3 } },
-    { generation: 16, result: { state: '..#.#..#...#.#...##...#...#.#..##..##...', start: -4 } },
-    { generation: 20, result: { state: '..#....##....#####...#######....#.#..##.', start: -4 } }
+    { generation: 1, result: [{ pos: 0, pot: '#' }, { pos: 4, pot: '#' }, { pos: 9, pot: '#' }, { pos: 15, pot: '#' }, { pos: 18, pot: '#' }, { pos: 21, pot: '#' }, { pos: 24, pot: '#' }] },
+    { generation: 2, result: [{ pos: 0, pot: '#' }, { pos: 1, pot: '#' }, { pos: 4, pot: '#' }, { pos: 5, pot: '#' }, { pos: 9, pot: '#' }, { pos: 10, pot: '#' }, { pos: 15, pot: '#' }, { pos: 18, pot: '#' }, { pos: 21, pot: '#' }, { pos: 24, pot: '#' }, { pos: 25, pot: '#' }] }
 ];
 
 allTestData.forEach(testData => {
@@ -28,7 +27,7 @@ allTestData.forEach(testData => {
             { pattern: '###.#', nextGeneration: '#' },
             { pattern: '####.', nextGeneration: '#' }
         ];
-        t.deepEqual(runModel(initialState, rules, testData.generation), testData.result);
+        t.deepEqual(runModel(initialState, rules, testData.generation, logger), testData.result);
     });
 });
 
@@ -50,5 +49,5 @@ test('Sum points with plants', t => {
         { pattern: '###.#', nextGeneration: '#' },
         { pattern: '####.', nextGeneration: '#' }
     ];
-    t.is(sumPotsWithPlants(initialState, rules, 20), 325);
+    t.is(sumPotsWithPlants(initialState, rules, 20, logger), 325);
 });

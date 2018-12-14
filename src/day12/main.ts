@@ -1,63 +1,50 @@
 import * as Logger from 'bunyan';
 
-export const runModel = (initialState: string, rules: { pattern: string, nextGeneration: string }[], generation: number, log: Logger): { state: string, start: number } => {
-    let currentGenerationPots = initialState.split('');
+export const runModel = (initialState: string, rules: { pattern: string, nextGeneration: string }[], generation: number, log: Logger): { pos: number, pot: string }[] => {
     let currentGeneration = 0;
-    let start = 0;
-    const firstPlant = currentGenerationPots.indexOf('#');
-    for (let i = firstPlant; i < 2; i++) {
-        currentGenerationPots.unshift('.');
-        start--;
-    }
-    let lastPlant = currentGenerationPots.lastIndexOf('#');
-    while (lastPlant > (currentGenerationPots.length - 3)) {
-        currentGenerationPots.push('.');
-        lastPlant = currentGenerationPots.lastIndexOf('#');
-    }
+    let pots = initialState.split('').map((pot, pos) => {
+        return { pos, pot };
+    }).filter(pot => pot.pot === '#');
+    let previousSum = 0;
     while (currentGeneration < generation) {
-        const newGenerationPots = currentGenerationPots.map((_pot, index) => {
-            let potSequence: string;
-            if (index < 2) {
-                potSequence = currentGenerationPots.slice(0, index + 3).join('');
-                for (let i = potSequence.length; i < 5; i++) {
-                    potSequence = '.' + potSequence;
-                }
-            } else {
-                potSequence = currentGenerationPots.slice(index - 2, index + 3).join('');
-                for (let i = potSequence.length; i < 5; i++) {
+        const firstPot = pots[0].pos;
+        const lastPot = pots[pots.length - 1].pos;
+        const newPots = [];
+        for (let pot = firstPot - 4; pot <= lastPot + 4; pot++) {
+            let potSequence = '';
+            for (let sequence = pot - 2; sequence <= pot + 2; sequence++) {
+                if (pots.find(thisPot => thisPot.pos === sequence)) {
+                    potSequence = potSequence + '#';
+                } else {
                     potSequence = potSequence + '.';
                 }
             }
-            const matchedRule = rules.find(rule => {
-                return rule.pattern === potSequence;
-            });
-            if (!matchedRule) {
-                log.info({ potSequence, index, generation }, 'Unmatched rule');
+            const matchedRule = rules.find(rule => rule.pattern === potSequence);
+            if (matchedRule && matchedRule.nextGeneration === '#') {
+                newPots.push({
+                    pos: pot,
+                    pot: '#'
+                });
             }
-            return matchedRule ? matchedRule.nextGeneration : '.';
-        });
+        }
+        pots = newPots;
         currentGeneration++;
-        currentGenerationPots = newGenerationPots;
-        const firstPlant = currentGenerationPots.indexOf('#');
-        for (let i = firstPlant; i < 2; i++) {
-            currentGenerationPots.unshift('.');
-            start--;
+        const sum = pots.reduce((sum, pot) => {
+            return sum + pot.pos
+        }, 0);
+        log.info({ sum, previousSum, diff: (sum - previousSum), currentGeneration }, 'Generation');
+        previousSum = sum;
+        if (currentGeneration % 10000 === 0) {
+            log.info({ currentGeneration }, 'Generation done');
         }
-        let lastPlant = currentGenerationPots.lastIndexOf('#');
-        while (lastPlant > (currentGenerationPots.length - 3)) {
-            currentGenerationPots.push('.');
-            lastPlant = currentGenerationPots.lastIndexOf('#');
-        }
-        log.info({ currentGeneration, pots: currentGenerationPots.join('') }, 'Generation done');
     }
-    return { state: currentGenerationPots.join(''), start: start };
+    return pots;
 };
 
 export const sumPotsWithPlants = (initialState: string, rules: ({ nextGeneration: string; pattern: string })[], generation: number, log: Logger): number => {
-    const endState = runModel(initialState, rules, generation, log);
-    const endPots = endState.state.split('');
-    return endPots.reduce((sum, pot, index) => {
-        return pot === '#' ? (sum + index + endState.start) : sum;
+    const endPots = runModel(initialState, rules, generation, log);
+    return endPots.reduce((sum, pot) => {
+        return sum + pot.pos
     }, 0);
 };
 
@@ -74,4 +61,9 @@ export const parse = (rawInput: string[], _log: Logger): ({ nextGeneration: stri
             nextGeneration: ruleParts[1]
         };
     });
+};
+
+export const run2 = (rules: ({ nextGeneration: string; pattern: string })[], log: Logger): number => {
+    const initialState = '####....#...######.###.#...##....#.###.#.###.......###.##..##........##..#.#.#..##.##...####.#..##.#';
+    return sumPotsWithPlants(initialState, rules, 50000000000, log);
 };
