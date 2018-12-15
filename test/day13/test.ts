@@ -1,5 +1,15 @@
 import { test } from 'ava';
-import { Cart, findFirstCrash, getCartsInOrder, moveCart, parse, State, tick, Track } from '../../src/day13/main';
+import {
+    Cart,
+    findFirstCrash,
+    findLastCartLocation,
+    getCartsInOrder,
+    moveCart,
+    parse,
+    State,
+    tick,
+    Track
+} from '../../src/day13/main';
 import * as Logger from 'bunyan';
 
 const logger = Logger.createLogger({ name: 'day-12-tests' });
@@ -61,7 +71,8 @@ test('Moves carts', t => {
         carts: [
             { x: 0, y: 2, direction: 'S' },
             { x: 0, y: 4, direction: 'N' }
-        ]
+        ],
+        crash: undefined
     };
     t.deepEqual(tick(initial, logger), expected);
 });
@@ -301,7 +312,8 @@ test('Horizontal tracks moving west', t => {
         carts: [
             { x: 0, y: 0, direction: 'W' },
             { x: 1, y: 0, direction: 'W' }
-        ]
+        ],
+        crash: undefined
     };
     t.deepEqual(tick(initialState, logger), expectedState);
 });
@@ -341,4 +353,18 @@ test('Simple horizontal head-on crash detection', t => {
         ]
     };
     t.deepEqual(tick(initialState, logger).crash, { x: 2, y: 0 });
+});
+
+test('Find location of final cart', t => {
+    const input = [
+        '/>-<\\  ',
+        '|   |  ',
+        '| /<+-\\',
+        '| | | v',
+        '\\>+</ |',
+        '  |   ^',
+        '  \\<->/'
+    ];
+    const state = parse(input, logger);
+    t.deepEqual(findLastCartLocation(state, logger), { x: 6, y: 4 });
 });

@@ -13,6 +13,7 @@ export type Cart = {
     y: number;
     direction: Direction;
     intersections?: number;
+    crashed?: boolean;
 }
 
 export type Track = {
@@ -74,15 +75,19 @@ export const tick = (initial: State, log: Logger): State => {
     while (initial.carts.length > 0) {
         let cart = initial.carts.shift();
         cart = moveCart(cart, initial.tracks);
-        if (cart.x === 16 && cart.y === 45) {
-            log.info('Are you sure you haven\'t crashed?');
+        let cartHit = initial.carts.find(existingCart => existingCart.x === cart.x && existingCart.y === cart.y);
+        if (cartHit) {
+            newState.crash = newState.crash || { x: cart.x, y: cart.y };
+            log.info({ x: cart.x, y: cart.y }, 'Crash!');
+            cart.crashed = true;
+            cartHit.crashed = true;
         }
-        if (initial.carts.find(existingCart => existingCart.x === cart.x && existingCart.y === cart.y)) {
+        cartHit = newState.carts.find(existingCart => existingCart.x === cart.x && existingCart.y === cart.y);
+        if (cartHit) {
             newState.crash = newState.crash || { x: cart.x, y: cart.y };
             log.info({ x: cart.x, y: cart.y }, 'Crash!');
-        } else if (!newState.crash && newState.carts.find(existingCart => existingCart.x === cart.x && existingCart.y === cart.y)) {
-            newState.crash = newState.crash || { x: cart.x, y: cart.y };
-            log.info({ x: cart.x, y: cart.y }, 'Crash!');
+            cart.crashed = true;
+            cartHit.crashed = true;
         }
         newState.carts.push(cart);
     }
@@ -144,4 +149,18 @@ export const findFirstCrash = (state: State, log: Logger): CrashLocation => {
 
 export const run1 = (state: State, log: Logger): CrashLocation => {
     return findFirstCrash(state, log);
+};
+
+export const findLastCartLocation = (state: State, log: Logger): { x: number, y: number } => {
+    do {
+        state = tick(state, log);
+        log.info({ carts: state.carts.length }, 'After tick');
+        state.carts = state.carts.filter(cart => cart.crashed === undefined || cart.crashed !== true);
+        log.info({ carts: state.carts.length }, 'After removing crashes');
+    } while (state.carts.length > 1);
+    return { x: state.carts[0].x, y: state.carts[0].y };
+};
+
+export const run2 = (state: State, log: Logger): CrashLocation => {
+    return findLastCartLocation(state, log);
 };
