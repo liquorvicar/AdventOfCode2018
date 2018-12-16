@@ -1,5 +1,8 @@
 import { test } from 'ava';
-import { createRecipes, nextTenRecipes } from '../../src/day14/main';
+import { countRecipesBeforeSequence, createRecipes, nextTenRecipes } from '../../src/day14/main';
+import * as Logger from 'bunyan';
+
+const logger = Logger.createLogger({ name: 'day-12-tests' });
 
 const recipeSequence = [
     {
@@ -53,4 +56,20 @@ nextTenRecipeTests.forEach(data => {
     test('Next ten recipes after ' + data.iterations, t => {
         t.is(nextTenRecipes(data.iterations), data.nextRecipes);
     });
+});
+
+test('Find recipes before 51589 appears', t => {
+    t.is(countRecipesBeforeSequence('51589', logger), 9);
+});
+
+test('Find recipes before 01245 appears', t => {
+    t.is(countRecipesBeforeSequence('01245', logger), 5);
+});
+
+test('Find recipes before 92510 appears', t => {
+    t.is(countRecipesBeforeSequence('92510', logger), 18);
+});
+
+test('Find recipes before 59414 appears', t => {
+    t.is(countRecipesBeforeSequence('59414', logger), 2018);
 });

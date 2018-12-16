@@ -32,3 +32,37 @@ export const parse = (rawInput: string[], _log: Logger): number => {
 export const run1 = (iterations: number, _log: Logger): string => {
     return nextTenRecipes(iterations);
 };
+
+export const run2 = (iterations: number, log: Logger): number => {
+    return countRecipesBeforeSequence(iterations.toString(), log);
+};
+
+export const countRecipesBeforeSequence = (sequence: string, log: Logger): number => {
+    let kitchen = {
+        recipes: [3, 7],
+        elves: [0, 1]
+    };
+    let sequencePos = -1;
+    const sequenceLength = sequence.length;
+    while (sequencePos < 0) {
+        kitchen = createRecipes(kitchen);
+        const countRecipes = kitchen.recipes.length;
+        if (countRecipes <= 8) {
+            continue;
+        }
+        sequencePos = kitchen.recipes.slice(countRecipes - sequenceLength).join('').indexOf(sequence);
+        if (sequencePos >= 0) {
+            sequencePos = countRecipes - sequenceLength;
+            break;
+        }
+        sequencePos = kitchen.recipes.slice(countRecipes - (sequenceLength + 1), countRecipes - 1).join('').indexOf(sequence);
+        if (sequencePos >= 0) {
+            sequencePos = countRecipes - (sequenceLength + 1);
+            break;
+        }
+        if (kitchen.recipes.length % 1000 === 0) {
+            log.info({ sequence, iterations: kitchen.recipes.length }, 'Checking...');
+        }
+    }
+    return sequencePos;
+};
