@@ -1,4 +1,4 @@
-import Logger = require('bunyan');
+import * as Logger from 'bunyan';
 
 export const calculatePowerLevel = (cell: { x: number; y: number }, serial: number): number => {
     const rackID = cell.x + 10;

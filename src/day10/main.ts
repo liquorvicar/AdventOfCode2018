@@ -110,7 +110,6 @@ export const lowestTotalDistance = (points: Point[], maxIterations): { distance:
 export const run1 = (points: Point[], _log: Logger) => {
     const lowest = lowestTotalDistance(points, 20000);
     writeFileSync('tmp.txt', generateOutput(lowest.points).join('\n'), { encoding: 'ascii' });
-    console.log(lowest.points);
 };
 
 
