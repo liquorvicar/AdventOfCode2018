@@ -1,4 +1,5 @@
 import * as Logger from 'bunyan';
+import * as clonedeep from 'lodash.clonedeep';
 
 export type UnitType = 'Goblin' | 'Elf';
 export type Unit = { type: UnitType; x: number; y: number; hitPoints: number; };
@@ -173,7 +174,7 @@ const moveUnit = (unit: Unit, state: State, targets: Location[]) => {
     return newUnits;
 };
 
-export const takeTurn = (unit: Unit, state: State): { units: Unit[], foundTarget: boolean } => {
+export const takeTurn = (unit: Unit, state: State, elfAttackPoints: number): { units: Unit[], foundTarget: boolean } => {
     if (unit.hitPoints <= 0) {
         return { units: state.units, foundTarget: true };
     }
@@ -187,15 +188,15 @@ export const takeTurn = (unit: Unit, state: State): { units: Unit[], foundTarget
     if (targetsInRange.length === 0) {
         units = moveUnit(unit, state, targets);
     }
-    units = attack(unit, units);
+    units = attack(unit, units, elfAttackPoints);
     return { units, foundTarget };
 };
 
-export const takeAllTurns = (state: State): { state: State, foundTarget: boolean } => {
+export const takeAllTurns = (state: State, elfAttackPoints: number): { state: State, foundTarget: boolean } => {
     const units = getUnitsInTurnOrder(state.units);
     let foundTarget = true;
     units.forEach(unit => {
-        const turnResult = takeTurn(unit, state);
+        const turnResult = takeTurn(unit, state, elfAttackPoints);
         state.units = turnResult.units;
         foundTarget = foundTarget && turnResult.foundTarget;
     });
@@ -203,7 +204,7 @@ export const takeAllTurns = (state: State): { state: State, foundTarget: boolean
     return { state, foundTarget };
 };
 
-export const attack = (unit: Unit, units: Unit[]): Unit[] => {
+export const attack = (unit: Unit, units: Unit[], elfAttackPoints: number): Unit[] => {
     const targets = identifyTargets(unit.type, units);
     const targetsInRange = findTargetsInRange(unit, targets);
     if (targetsInRange.length === 0) {
@@ -223,7 +224,8 @@ export const attack = (unit: Unit, units: Unit[]): Unit[] => {
         }
         return currentTarget;
     }, null);
-    target.hitPoints = target.hitPoints - 3;
+    const attackPoints = unit.type === 'Elf' ? elfAttackPoints : 3;
+    target.hitPoints = target.hitPoints - attackPoints;
     const newUnits = units.map(otherUnit => {
         if (otherUnit.x !== target.x || otherUnit.y !== target.y) {
             return otherUnit;
@@ -233,31 +235,47 @@ export const attack = (unit: Unit, units: Unit[]): Unit[] => {
     return newUnits;
 };
 
-export const runCombat = (state: State, log: Logger): { turns: number, remainingHitPoints: number } => {
+export const runCombat = (state: State, elfAttackPoints: number, log: Logger): { turns: number, remainingUnits: Unit[] } => {
     const result = {
         turns: 0,
-        remainingHitPoints: 0
+        remainingUnits: []
     };
     let combatInProgress = true;
     while (combatInProgress) {
         result.turns++;
         log.info(result.turns);
-        const endOfTurn = takeAllTurns(state);
+        const endOfTurn = takeAllTurns(state, elfAttackPoints);
         state = endOfTurn.state;
         combatInProgress = endOfTurn.foundTarget;
     }
     result.turns--;
-    result.remainingHitPoints = state.units.reduce((sum, unit) => {
-        return sum + unit.hitPoints;
-    }, 0);
+    result.remainingUnits = state.units;
     return result;
 };
 
 export const run1 = (state: State, log: Logger): number => {
-    const result = runCombat(state, log);
-    return result.turns * result.remainingHitPoints;
+    const result = runCombat(state, 3, log);
+    return result.turns * result.remainingUnits.reduce((sum, unit) => {
+        return sum + unit.hitPoints;
+    }, 0);
 };
 
-export const run2 = (_iterations: number, _log: Logger): number => {
-    return 0;
+export const run2 = (state: State, log: Logger): number => {
+    const originalNumberOfElves = state.units.filter(unit => unit.type === 'Elf').length;
+    let elvesHaveDied = true;
+    let elfAttackPoints = 3;
+    let result;
+    const originalState = clonedeep(state);
+    while (elvesHaveDied) {
+        state = clonedeep(originalState);
+        result = runCombat(state, elfAttackPoints, log);
+        const numberElvesAlive = result.remainingUnits.filter(unit => unit.type === 'Elf').length;
+        if (numberElvesAlive === originalNumberOfElves) {
+            elvesHaveDied = false;
+        }
+        elfAttackPoints++;
+    }
+    return result.turns * result.remainingUnits.reduce((sum, unit) => {
+        return sum + unit.hitPoints;
+    }, 0);
 };
