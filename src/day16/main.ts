@@ -1,5 +1,6 @@
 import * as clonedeep from 'lodash.clonedeep';
-import Logger = require('bunyan');
+import * as uniq from 'lodash.uniq';
+import * as Logger from 'bunyan';
 
 type Registers = {
     0: number;
@@ -118,15 +119,12 @@ const matches = (register: Registers, after: Registers): boolean => {
         && register['3'] === after['3'];
 };
 
-export const findMatchingOpcodes = (before: Registers, instruction: number[], after: Registers): number => {
-    return opCodes.reduce((count, opCode) => {
+export const findMatchingOpcodes = (before: Registers, instruction: number[], after: Registers): OpCode[] => {
+    return opCodes.filter(opCode => {
         let register = clonedeep(before);
         register = opCode(instruction[1], instruction[2], instruction[3], register);
-        if (matches(register, after)) {
-            count++;
-        }
-        return count;
-    }, 0);
+        return matches(register, after);
+    });
 };
 
 export const parse = (rawInput: string[], _log: Logger): string[] => {
@@ -162,7 +160,7 @@ export const run1 = (input: string[], _log: Logger): number => {
             instruction = parseInstruction(line);
         }
         if (before && instruction && after) {
-            if (findMatchingOpcodes(before, instruction, after) >= 3) {
+            if (findMatchingOpcodes(before, instruction, after).length >= 3) {
                 count++;
             }
             before = null;
@@ -171,4 +169,81 @@ export const run1 = (input: string[], _log: Logger): number => {
         }
     });
     return count;
+};
+
+export const findOpCodeWithOnePossibleMatch = (possibleOpCodeMatches) => {
+    for (const id in possibleOpCodeMatches) {
+        if (!possibleOpCodeMatches.hasOwnProperty(id)) {
+            continue;
+        }
+        const matches = uniq(possibleOpCodeMatches[id]);
+        if (matches.length === 1) {
+            return id;
+        }
+    }
+    return false;
+};
+
+export const run2 = (input: string[], _log: Logger): number => {
+    let before;
+    let after;
+    let instruction;
+    const possibleOpCodeMatches = {};
+    const program = [];
+    let parseProgram = false;
+    input.forEach(line => {
+        if (line.startsWith('Before')) {
+            before = parseRegister(line.replace('Before: ', ''));
+        } else if (line.startsWith('After')) {
+            after = parseRegister(line.replace('After: ', ''));
+        } else if (line.trim() === '++++++++') {
+            parseProgram = true;
+            _log.info('Found blank line');
+        } else {
+            instruction = parseInstruction(line);
+        }
+
+        if (before && instruction && after) {
+            if (!possibleOpCodeMatches[instruction[0]]) {
+                possibleOpCodeMatches[instruction[0]] = [];
+            }
+            const matches = findMatchingOpcodes(before, instruction, after);
+            possibleOpCodeMatches[instruction[0]].push(...matches);
+            before = null;
+            after = null;
+            instruction = null;
+        } else if (parseProgram && instruction) {
+            program.push(instruction);
+        }
+    });
+    const opCodes: { [key: number]: OpCode } = {};
+    while (true) {
+        const foundCode = findOpCodeWithOnePossibleMatch(possibleOpCodeMatches);
+        if (foundCode === false) {
+            break;
+        }
+        opCodes[foundCode] = possibleOpCodeMatches[foundCode][0];
+        delete possibleOpCodeMatches[foundCode];
+        _log.info({ id: foundCode }, 'Found match');
+        for (const id in possibleOpCodeMatches) {
+            if (!possibleOpCodeMatches.hasOwnProperty(id)) {
+                continue;
+            }
+            possibleOpCodeMatches[id] = possibleOpCodeMatches[id].filter(possibleMatch => {
+                return possibleMatch !== opCodes[foundCode];
+            });
+        }
+    }
+    _log.info({ opCodes }, 'Matched all op codes');
+    let registers: Registers = {
+        0: 0,
+        1: 0,
+        2: 0,
+        3: 0
+    };
+    program.forEach(instruction => {
+        _log.info({ instruction }, 'Executing program instruction');
+        registers = opCodes[instruction[0]](instruction[1], instruction[2], instruction[3], registers);
+    });
+    return registers[0];
 };

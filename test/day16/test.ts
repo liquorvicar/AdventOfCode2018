@@ -117,5 +117,5 @@ test('Finds all matching opcodes', t => {
     const before = { 0: 3, 1: 2, 2: 1, 3: 1 };
     const instruction = [9, 2, 1, 2];
     const after = { 0: 3, 1: 2, 2: 2, 3: 1 };
-    t.is(findMatchingOpcodes(before, instruction, after), 3);
+    t.is(findMatchingOpcodes(before, instruction, after).length, 3);
 });
